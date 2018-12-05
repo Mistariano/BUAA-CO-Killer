@@ -6,7 +6,7 @@
 
 **如果在测试CPU时使用了该项目生成的测试数据，建议向助教主动说明**
 
-开发中，非常欢迎contribution
+开发中，非常欢迎contribution，包括但不限于issue、bug report
 
 作者的课设当前进度：P6
 
