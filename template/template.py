@@ -1,5 +1,5 @@
 import random
-from instrument.instrument import *
+from instruction.instruction import *
 
 
 class Template:

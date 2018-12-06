@@ -1,7 +1,7 @@
-from instrument.instrument import *
+from instruction.instruction import *
 
 
-class NOP(Instrument):
+class NOP(Instruction):
     name = 'nop'
 
     def compile(self):

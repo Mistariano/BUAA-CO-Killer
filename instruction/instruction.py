@@ -1,7 +1,7 @@
 from utils.placeholder import Placeholder
 
 
-class Instrument:
+class Instruction:
     name = 'BASE_INSTRUMENT'
 
     def __init__(self):
@@ -9,13 +9,13 @@ class Instrument:
             raise Warning('self.name != class_name:', self.name, self.__class__)
 
     def compile(self):
-        raise NotImplementedError('Should implement Instrument!')
+        raise NotImplementedError('Should implement Instruction!')
 
     def __str__(self):
         return self.compile()
 
 
-class Comment(Instrument):
+class Comment(Instruction):
     name = 'comment'
 
     def __init__(self, content):
@@ -26,7 +26,7 @@ class Comment(Instrument):
         return '# ' + self.content
 
 
-class Label(Instrument):
+class Label(Instruction):
     cnt = 0
     name = 'label'
 
@@ -46,7 +46,7 @@ class Label(Instrument):
         return self._label + ':'
 
 
-class RFormatInstr(Instrument):
+class RFormatInstr(Instruction):
     name = 'DEFAULT_R'
 
     def __init__(self, rs=None, rt=None, rd=None):
@@ -62,7 +62,7 @@ class RFormatInstr(Instrument):
         return '{} ${} ${} ${}'.format(self.name, rd, rs, rt)
 
 
-class IFormatInstr(Instrument):
+class IFormatInstr(Instruction):
     name = 'DEFAULT_I'
 
     def __init__(self, rs=None, rt=None, imm=None):
@@ -78,7 +78,7 @@ class IFormatInstr(Instrument):
         return '{} ${} ${} {}'.format(self.name, rt, rs, imm)
 
 
-class IHexFormatInstr(Instrument):
+class IHexFormatInstr(Instruction):
     name = 'DEFAULT_I'
 
     def __init__(self, rs=None, rt=None, imm=None):
@@ -94,7 +94,7 @@ class IHexFormatInstr(Instrument):
         return '{} ${} ${} {}'.format(self.name, rt, rs, imm)
 
 
-class IUFormatInstr(Instrument):
+class IUFormatInstr(Instruction):
     name = 'DEFAULT_IU'
 
     def __init__(self, rs=None, rt=None, imm=None):
@@ -111,12 +111,12 @@ class IUFormatInstr(Instrument):
         return '{} ${} ${} {}'.format(self.name, rt, rs, imm)
 
 
-class SLFormatInstr(Instrument):
+class SLFormatInstr(Instruction):
     """
     Should implement this class with changing the value of align if you want to define lb, sb, lh, sh or something else.
     """
     name = 'DEFAULT_SL'
-    align = 4
+    align = None
 
     def __init__(self, rs=None, rt=None, offset=None, sl_safe_mode=True, use_smaller_mem=True):
         super().__init__()
@@ -147,7 +147,7 @@ class SLFormatInstr(Instrument):
             return '{} ${} {}({})'.format(self.name, rt, offset, rs)  # it's dangerous when rs is not 0.
 
 
-class LUIFormatInstr(Instrument):
+class LUIFormatInstr(Instruction):
     name = 'DEFAULT_LUI'
 
     def __init__(self, rt=None, imm=None):
@@ -161,7 +161,7 @@ class LUIFormatInstr(Instrument):
         return '{} ${} {}'.format(self.name, rt, imm)
 
 
-class MULTFormatInstr(Instrument):
+class MULTFormatInstr(Instruction):
     name = 'DEFAULT_MULT'
 
     def __init__(self, rs=None, rt=None):
@@ -175,7 +175,7 @@ class MULTFormatInstr(Instrument):
         return '{} ${} ${}'.format(self.name, rs, rt)
 
 
-class ShiftFormatInstr(Instrument):
+class ShiftFormatInstr(Instruction):
     name = 'DEFAULT_SLL'
 
     def __init__(self, rt=None, rd=None, sa=None):
