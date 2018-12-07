@@ -6,9 +6,9 @@
 
 **如果在测试CPU时使用了该项目生成的测试数据，建议向助教主动说明**
 
-开发中，非常欢迎contribution，包括但不限于issue、bug report
+开发中，**非常欢迎contribution**，包括但不限于issue、bug report
 
-作者的课设当前进度：P6
+作者的课设当前进度：P7
 
 环境依赖：
 - Python 3.6
@@ -17,11 +17,23 @@
 ## 安装与运行
 
 ```bash
-# Installation: stay tuned...
-...
+# Download
+git clone https://github.com/Mistariano/BUAA-CO-Killer.git
 
-# Run: 将在近期支持命令行参数
+# Install as a script 
+# Stay tuned...
+
+# Run with default settings
 python main.py
+
+# Show helps
+python main.py -h
+
+# Generate 100 asm files, with 1023 instructions in each of them
+python main.py --n_case 100 --k_instr 1023
+
+# Generate test cases for P6(on MIPS-C3)
+python main.py --instr_set c3
 ```
 
 ## 支持指令
