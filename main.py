@@ -20,7 +20,7 @@ if __name__ == '__main__':
     for i in range(args.n):
         instr_list = MIPS_LITE_WITHOUT_JUMP if args.instr_set == 'lite' else MIPS_C3_WITHOUT_JUMP
         if args.template == 'random_k':
-            asm = RandomKTemplate(MIPS_LITE_WITHOUT_JUMP, k=1023).compile()
+            asm = RandomKTemplate(instr_list, k=1023).compile()
         else:
             raise Exception('Template not found: no template named "{}"'.format(args.template))
         print(asm)
