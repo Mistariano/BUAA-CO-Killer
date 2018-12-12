@@ -91,9 +91,20 @@ python main.py --instr_set c3
 49.	MTHI*
 50.	MTLO*
 
-## 自定义代码模板
+## 自定义测试
 
-stay tuned
+尚未完成，目前可以尝试直接修改/添加源码实现自定义测试（包括分支跳转等指令的测试）
+
+### 添加指令
+
+1. 声明一个指令类，集成instruction.Instruction，并将其name属性设为类名小写
+2. 重载__init__方法，如果需要自动随机生成，使用utils.Placeholder定义相应字段
+3. 在instr_set中将新指令加入已存在的指令级，或新建指令集
+
+### 添加自定义代码模板
+
+1. 声明一个模板类，继承template.Template
+2. 重载compile方法，返回一个字符串
 
 ## 自动化测试：多进程、调度器及任务队列
 
