@@ -82,8 +82,8 @@ class MULT(MULTFormatInstr):
 
 
 # 14
-class MULTV(MULTFormatInstr):
-    name = 'multv'
+class MULTU(MULTFormatInstr):
+    name = 'multu'
 
 
 # 15
@@ -198,21 +198,30 @@ class SLTU(RFormatInstr):
 
 # 37...
 
-# 47
+# 43
+class J(JFormatInstr):
+    name = 'j'
 
 
 MIPS_LITE_WITHOUT_JUMP = [NOP, ADDU, SUBU, ORI, LW, SW]
 
-MIPS_C3_WITHOUT_JUMP = [
+MIPS_C3_SUBSET = [
     LB, LBU, LH, LHU, LW,  # 1-5
     SB, SH, SW,  # 6-8
     # ADD, SUB # 9, 11
     ADDU, SUBU,  # 10, 12
+    MULT, MULTU,  # 13,14
+    # DIV, DIVU,  # 15,16
     SLL, SRL, SRA, SLLV, SRLV, SRAV,  # 17-22
     AND, OR, XOR, NOR,  # 23-26
     # ADDI, 27
     ADDIU, ANDI, ORI, XORI, LUI,  # 28-32
-    SLTI, SLTIU, SLT, SLTU
+    SLTI, SLTIU, SLT, SLTU,  # 33-36
+]
+
+MIPS_C4_SUBSET = MIPS_C3_SUBSET + [
+    ADD, SUB,  # 9, 11
+    ADDI,  # 27
 ]
 
 if __name__ == '__main__':

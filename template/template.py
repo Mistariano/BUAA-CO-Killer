@@ -1,5 +1,5 @@
 import random
-from instruction.instruction import *
+from instruction import *
 
 
 class Template:
@@ -32,3 +32,13 @@ class RandomKTemplate(Template):
         self.instr_instance_list = \
             [random.choice(self.instr_set)() for _ in range(self.k)]
         return super().compile()
+
+
+class TailTemplate(Template):
+    def __init__(self):
+        label = Label('tail_loop')
+        instr_list = [
+            label,
+            J(label)
+        ]
+        super().__init__(instr_list, False)

@@ -52,8 +52,8 @@ python main.py --instr_set c3
 10.	ADDU
 11.	SUB
 12.	SUBU
-13.	MULT*
-14.	MULTU*
+13.	MULT
+14.	MULTU
 15.	DIV*
 16.	DIVU*
 17.	SLL

@@ -34,7 +34,7 @@ class Label(Instruction):
         super().__init__()
         if not prefix:
             prefix = ''
-        else:
+        elif prefix[-1] != '_':
             prefix += '_'
         self._label = prefix + str(Label.cnt)
         Label.cnt += 1
@@ -191,3 +191,14 @@ class ShiftFormatInstr(Instruction):
         if sa < 0:
             sa = -sa - 1
         return '{} ${} ${} {}'.format(self.name, rd, rt, sa)
+
+
+class JFormatInstr(Instruction):
+    name = 'DEFAULT_J'
+
+    def __init__(self, label: Label):
+        super().__init__()
+        self.label = label
+
+    def compile(self):
+        return '{} {}'.format(self.name, self.label.get_label())
