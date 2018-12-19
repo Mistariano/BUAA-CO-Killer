@@ -5,8 +5,8 @@ class Placeholder:
     def __init__(self, value=None, range=None, radix='dec'):
         """
 
-        :param value:
-        :param range:
+        :param value: The value of the holder. If none, will be a random value
+        :param range: 'reg', 3, 4, 5, 14, 15, 16, 32
         :param radix: 'dec' for signed decimal, 'hex' for unsigned hexadecimal
         """
 

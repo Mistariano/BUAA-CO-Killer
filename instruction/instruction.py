@@ -4,8 +4,8 @@ from utils.placeholder import Placeholder
 class Instruction:
     name = 'BASE_INSTRUMENT'
 
-    def __init__(self):
-        if self.__class__.__name__.lower() != self.name.lower():
+    def __init__(self, check_name=True):
+        if check_name and self.__class__.__name__.lower() != self.name.lower():
             raise Warning('self.name != class_name:', self.name, self.__class__)
 
     def compile(self):
@@ -118,21 +118,17 @@ class SLFormatInstr(Instruction):
     name = 'DEFAULT_SL'
     align = None
 
-    def __init__(self, rs=None, rt=None, offset=None, sl_safe_mode=True, use_smaller_mem=True):
-        super().__init__()
+    def __init__(self, rs=None, rt=None, offset=None, aligned_mode=True, safe_mode=True, use_smaller_mem=True, check_name=True):
+        super().__init__(check_name=check_name)
         self.rs = Placeholder(rs)
         self.rt = Placeholder(rt)
-        self.sl_safe_mode = sl_safe_mode
-        if sl_safe_mode:
+        self.sl_safe_mode = safe_mode
+        if aligned_mode:
             assert self.align in [1, 2, 4]
-            if self.align == 4:
-                self.offset = Placeholder(offset, range=3 if use_smaller_mem else 14, radix='DEC')
-            elif self.align == 2:
-                self.offset = Placeholder(offset, range=4 if use_smaller_mem else 15, radix='DEC')
-            else:
-                self.offset = Placeholder(offset, range=5 if use_smaller_mem else 16, radix='DEC')
+            zeros = (self.align + 1) // 2 - self.align % 2  # 1:0, 2:1, 4:2
+            self.offset = Placeholder(offset, range=5 - zeros if use_smaller_mem else 16 - zeros, radix='DEC')
         else:
-            self.offset = Placeholder(offset, range=16, radix='DEC')
+            self.offset = Placeholder(offset, range=5 if use_smaller_mem else 16, radix='DEC')
 
     def compile(self):
         rs = self.rs.compile()
@@ -144,7 +140,7 @@ class SLFormatInstr(Instruction):
             offset *= self.align
             return '{} ${} {}($0)'.format(self.name, rt, offset)
         else:
-            return '{} ${} {}({})'.format(self.name, rt, offset, rs)  # it's dangerous when rs is not 0.
+            return '{} ${} {}(${})'.format(self.name, rt, offset, rs)  # it's dangerous when rs is not 0.
 
 
 class LUIFormatInstr(Instruction):
@@ -202,3 +198,14 @@ class JFormatInstr(Instruction):
 
     def compile(self):
         return '{} {}'.format(self.name, self.label.get_label())
+
+
+class LOHIFormatInstr(Instruction):
+    name = 'DEFAULT_LOHI'
+
+    def __init__(self, rt=None):
+        super().__init__()
+        self.rt = Placeholder(rt)
+
+    def compile(self):
+        return '{} ${}'.format(self.name, self.rt.compile())

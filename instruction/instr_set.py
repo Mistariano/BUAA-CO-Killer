@@ -26,6 +26,11 @@ class LH(SLFormatInstr):
     name = 'lh'
 
 
+class LHNotAligned(LH):
+    def __init__(self):
+        super().__init__(aligned_mode=False, check_name=False)
+
+
 # 4
 class LHU(SLFormatInstr):
     align = 2
@@ -36,6 +41,11 @@ class LHU(SLFormatInstr):
 class LW(SLFormatInstr):
     align = 4
     name = 'lw'
+
+
+class LWNotAligned(LW):
+    def __init__(self):
+        super().__init__(aligned_mode=False, check_name=False)
 
 
 # 6
@@ -50,10 +60,20 @@ class SH(SLFormatInstr):
     name = 'sh'
 
 
+class SHNotAligned(SH):
+    def __init__(self):
+        super().__init__(aligned_mode=False, check_name=False)
+
+
 # 8
 class SW(SLFormatInstr):
     align = 4
     name = 'sw'
+
+
+class SWNotAligned(SW):
+    def __init__(self):
+        super().__init__(aligned_mode=False, check_name=False)
 
 
 # 9
@@ -203,6 +223,26 @@ class J(JFormatInstr):
     name = 'j'
 
 
+# 47
+class MFHI(LOHIFormatInstr):
+    name = 'mfhi'
+
+
+# 48
+class MFLO(LOHIFormatInstr):
+    name = 'mflo'
+
+
+# 49
+class MTHI(LOHIFormatInstr):
+    name = 'mthi'
+
+
+# 50
+class MTLO(LOHIFormatInstr):
+    name = 'mtlo'
+
+
 MIPS_LITE_WITHOUT_JUMP = [NOP, ADDU, SUBU, ORI, LW, SW]
 
 MIPS_C3_SUBSET = [
@@ -217,11 +257,14 @@ MIPS_C3_SUBSET = [
     # ADDI, 27
     ADDIU, ANDI, ORI, XORI, LUI,  # 28-32
     SLTI, SLTIU, SLT, SLTU,  # 33-36
+    MFHI, MFLO, MTHI, MTLO,  # 47-50
 ]
 
 MIPS_C4_SUBSET = MIPS_C3_SUBSET + [
     ADD, SUB,  # 9, 11
     ADDI,  # 27
+    SHNotAligned, SWNotAligned,
+    LHNotAligned, LWNotAligned
 ]
 
 if __name__ == '__main__':

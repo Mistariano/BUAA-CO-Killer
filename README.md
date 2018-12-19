@@ -86,10 +86,10 @@ python main.py --instr_set c3
 44.	JAL*
 45.	JR*
 46.	JALR*
-47.	MFHI*
-48.	MFLO*
-49.	MTHI*
-50.	MTLO*
+47.	MFHI
+48.	MFLO
+49.	MTHI
+50.	MTLO
 
 ## 自定义测试
 
