@@ -98,7 +98,7 @@ class TailTemplate(Template):
             J(label),
             NOP()
         ]
-        return instr_list
+        self.compilable_instances = instr_list
 
 
 class ExcHandlerTemplate(Template):
@@ -125,7 +125,7 @@ class COP0InitTemplate(Template):
         instr_list = [
             self._MTC0SR()
         ]
-        return instr_list
+        self.compilable_instances = instr_list
 
 
 if __name__ == '__main__':
