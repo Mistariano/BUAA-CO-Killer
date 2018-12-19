@@ -2,14 +2,20 @@ import random
 from instruction import *
 
 
-class Template:
-    def __init__(self, instr_instance_list=None, with_pc_comment=True, pc_start=0x3000):
+class Template(Instruction):
+    def __init__(self, instr_instance_list: list = None, with_pc_comment=True, pc_start=0x3000):
+        super().__init__(False)
         if instr_instance_list:
             self.instr_instance_list = [instr for instr in instr_instance_list]
         else:
             self.instr_instance_list = []
+        pc_cnt = 0
+        for instr in self.instr_instance_list:
+            assert isinstance(instr, Instruction)
+            pc_cnt += instr.get_pc_cnt()
         self.with_pc_comment = with_pc_comment
         self.pc_start = pc_start
+        self._pc_cnt = pc_cnt
 
     def compile(self):
         if self.with_pc_comment:
@@ -20,6 +26,18 @@ class Template:
         else:
             instr_list = self.instr_instance_list
         return '\n'.join([instr.compile() for instr in instr_list])
+
+    def get_pc_cnt(self):
+        return self._pc_cnt
+
+    class PCCommentWrapper(Instruction):
+        def __index__(self, instr: Instruction, pc_gen):
+            super().__init__(check_name=False)
+            self._comment = Comment(hex(pc_gen.__next__()))
+            self._instr = instr
+
+        def compile(self):
+            return self._instr.compile() + '\n' + self._comment.compile()
 
 
 class RandomKTemplate(Template):

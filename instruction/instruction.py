@@ -11,6 +11,9 @@ class Instruction:
     def compile(self):
         raise NotImplementedError('Should implement Instruction!')
 
+    def get_pc_cnt(self):
+        return 1
+
     def __str__(self):
         return self.compile()
 
@@ -24,6 +27,9 @@ class Comment(Instruction):
 
     def compile(self):
         return '# ' + self.content
+
+    def get_pc_cnt(self):
+        return 0
 
 
 class Label(Instruction):
@@ -44,6 +50,9 @@ class Label(Instruction):
 
     def compile(self):
         return self._label + ':'
+
+    def get_pc_cnt(self):
+        return 0
 
 
 class RFormatInstr(Instruction):
@@ -118,7 +127,8 @@ class SLFormatInstr(Instruction):
     name = 'DEFAULT_SL'
     align = None
 
-    def __init__(self, rs=None, rt=None, offset=None, aligned_mode=True, safe_mode=True, use_smaller_mem=True, check_name=True):
+    def __init__(self, rs=None, rt=None, offset=None, aligned_mode=True, safe_mode=True, use_smaller_mem=True,
+                 check_name=True):
         super().__init__(check_name=check_name)
         self.rs = Placeholder(rs)
         self.rt = Placeholder(rt)
