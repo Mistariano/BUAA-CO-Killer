@@ -1,5 +1,8 @@
 
 output
+*.egg-info
+build/
+dist/
 
 #////////////////////////////////////////////////////
 # Created by https://www.gitignore.io/api/pycharm+all
