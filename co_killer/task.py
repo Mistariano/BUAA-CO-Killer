@@ -27,6 +27,8 @@ class Task:
         tail = TailTemplate(with_pc_comment=self._with_pc_comment, pc_gen=self._text_pc_gen)
         templates = self.templates + [tail]
         for i in range(self._repeat_time):
+            self._text_pc_gen.reset()
+            self._ktext_pc_gen.reset()
             output_filename = '{}_repeat{}.asm'.format(self.name, str(i))
             output_path = os.path.join(self._output_dir, output_filename)
             if not os.path.exists(self._output_dir):

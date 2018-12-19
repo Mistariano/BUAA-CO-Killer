@@ -56,7 +56,21 @@ class Template(Compilable):
                 yield cur
                 cur += 4
 
-        return pc_gen(pc_start)
+        class RestartableGen:
+            def __init__(self, start):
+                self._pc_gen = pc_gen(start)
+                self._pc_start = start
+
+            def reset(self):
+                self._pc_gen = pc_gen(self._pc_start)
+
+            def __iter__(self):
+                return self._pc_gen
+
+            def __next__(self):
+                return self._pc_gen.__next__()
+
+        return RestartableGen(pc_start)
 
 
 class RandomKTemplate(Template):
