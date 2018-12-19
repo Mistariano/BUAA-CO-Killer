@@ -1,10 +1,10 @@
-from template import RandomKTemplate, TailTemplate
+from template import *
 from instruction import MIPS_LITE_WITHOUT_JUMP, MIPS_C3_SUBSET, MIPS_C4_SUBSET
 import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-k', '--k_instr', dest='k', type=int, metavar='k', default=1023,
+parser.add_argument('-k', '--k_instr', dest='k', type=int, metavar='k', default=1000,
                     help="generate k random instructions.")
 parser.add_argument('-n', '--n_case', dest='n', type=int, metavar='n', default=10,
                     help="the number of generated test cases.")
@@ -25,16 +25,18 @@ if __name__ == '__main__':
         exc_handler = f.read()
     for i in range(args.n):
         if args.template == 'random_k':
-            asm = RandomKTemplate(instr_list, k=1000).compile()
-            tail = TailTemplate().compile()
-            asm = asm + '\n' + tail
+            pc_gen = Template.get_pc_generator(0x3000)
+            exc_handler = ExcHandlerTemplate(pc_gen=pc_gen).compile()
+            rand_k = RandomKTemplate(instr_list, k=args.k, pc_gen=pc_gen).compile()
+            tail = TailTemplate(pc_gen=pc_gen).compile()
+            if args.instr_set == 'c4':
+                asm = exc_handler + '\n' + rand_k + '\n' + tail
+            else:
+                asm = rand_k + '\n' + tail
         else:
             raise Exception('Template not found: no template named "{}"'.format(args.template))
         # print(asm)
         if not os.path.exists('output'):
             os.mkdir('output')
         with open('output/rand{}.asm'.format(i), 'w') as f:
-            if args.instr_set == 'c4':
-                asm = exc_handler + asm
-
             f.write(asm)

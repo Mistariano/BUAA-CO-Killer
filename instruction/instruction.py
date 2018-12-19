@@ -1,15 +1,18 @@
 from utils.placeholder import Placeholder
 
 
-class Instruction:
+class Compilable:
+    def compile(self):
+        raise NotImplementedError('Should implement compile() of a Compilable')
+
+
+class Instruction(Compilable):
     name = 'BASE_INSTRUMENT'
 
-    def __init__(self, check_name=True):
+    def __init__(self, check_name=True, has_pc=True):
         if check_name and self.__class__.__name__.lower() != self.name.lower():
             raise Warning('self.name != class_name:', self.name, self.__class__)
-
-    def compile(self):
-        raise NotImplementedError('Should implement Instruction!')
+        self.has_pc = has_pc
 
     def get_pc_cnt(self):
         return 1
@@ -17,8 +20,11 @@ class Instruction:
     def __str__(self):
         return self.compile()
 
+    def compile(self):
+        raise NotImplementedError('Should implement compile() of an Instruction!')
 
-class Comment(Instruction):
+
+class Comment(Compilable):
     name = 'comment'
 
     def __init__(self, content):
@@ -28,11 +34,8 @@ class Comment(Instruction):
     def compile(self):
         return '# ' + self.content
 
-    def get_pc_cnt(self):
-        return 0
 
-
-class Label(Instruction):
+class Label(Compilable):
     cnt = 0
     name = 'label'
 
@@ -50,9 +53,6 @@ class Label(Instruction):
 
     def compile(self):
         return self._label + ':'
-
-    def get_pc_cnt(self):
-        return 0
 
 
 class RFormatInstr(Instruction):

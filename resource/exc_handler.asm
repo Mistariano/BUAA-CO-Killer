@@ -103,4 +103,3 @@ _restore_context:
 
 .text
 
-    mtc0 $0 $12

@@ -2,61 +2,83 @@ import random
 from instruction import *
 
 
-class Template(Instruction):
-    def __init__(self, instr_instance_list: list = None, with_pc_comment=True, pc_start=0x3000):
-        super().__init__(False)
-        if instr_instance_list:
-            self.instr_instance_list = [instr for instr in instr_instance_list]
-        else:
-            self.instr_instance_list = []
-        pc_cnt = 0
-        for instr in self.instr_instance_list:
-            assert isinstance(instr, Instruction)
-            pc_cnt += instr.get_pc_cnt()
+class Template(Compilable):
+    def __init__(self, compilable_instances: list = None, with_pc_comment=True, pc_gen=None):
+        if not compilable_instances:
+            compilable_instances = []
+        assert not with_pc_comment or pc_gen is not None
+        self.compilable_instances = []
+        wrapper_cls = self._PCCommentWrapper
+        for cmp in compilable_instances:
+            assert isinstance(cmp, Compilable)
+            if isinstance(cmp, Instruction) and with_pc_comment:
+                cmp = wrapper_cls(cmp, pc_gen)
+            self.compilable_instances.append(cmp)
+
         self.with_pc_comment = with_pc_comment
-        self.pc_start = pc_start
-        self._pc_cnt = pc_cnt
+        self.pc_gen = pc_gen
 
     def compile(self):
-        if self.with_pc_comment:
-            pc_start = self.pc_start
-            instr_cnt = len(self.instr_instance_list)
-            comments = [Comment(hex(pc_start + 4 * i)) for i in range(instr_cnt)]
-            instr_list = [self.instr_instance_list[i // 2] if i % 2 else comments[i // 2] for i in range(2 * instr_cnt)]
+        cmp_list = self.compilable_instances
+        return '\n'.join([cmp.compile() for cmp in cmp_list])
+
+    def append(self, compilable: Compilable):
+        if self.with_pc_comment and isinstance(compilable, Instruction):
+            self.compilable_instances.append(self._PCCommentWrapper(compilable, self.pc_gen))
         else:
-            instr_list = self.instr_instance_list
-        return '\n'.join([instr.compile() for instr in instr_list])
+            self.compilable_instances.append(compilable)
 
-    def get_pc_cnt(self):
-        return self._pc_cnt
-
-    class PCCommentWrapper(Instruction):
-        def __index__(self, instr: Instruction, pc_gen):
-            super().__init__(check_name=False)
-            self._comment = Comment(hex(pc_gen.__next__()))
-            self._instr = instr
+    class _PCCommentWrapper(Compilable):
+        def __init__(self, _instr: Instruction, pc_gen):
+            self._comment = Comment(hex(next(pc_gen)))
+            self._instr = _instr
 
         def compile(self):
-            return self._instr.compile() + '\n' + self._comment.compile()
+            return self._comment.compile() + '\n' + self._instr.compile()
+
+    @staticmethod
+    def get_pc_generator(pc_start):
+        def pc_gen(start):
+            cur = start
+            while True:
+                yield cur
+                cur += 4
+
+        return pc_gen(pc_start)
 
 
 class RandomKTemplate(Template):
-    def __init__(self, instr_set: list, k=100, with_pc_comment=True, pc_start=0x3000):
-        self.instr_set = instr_set
+    def __init__(self, compilable_set: list, k=100, with_pc_comment=True, pc_gen=None):
+        self.compilable_set = compilable_set
         self.k = k
-        super().__init__(with_pc_comment=with_pc_comment, pc_start=pc_start)
-
-    def compile(self):
-        self.instr_instance_list = \
-            [random.choice(self.instr_set)() for _ in range(self.k)]
-        return super().compile()
+        compilable_instances = \
+            [random.choice(self.compilable_set)() for _ in range(self.k)]
+        super().__init__(compilable_instances=compilable_instances, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
 
 
 class TailTemplate(Template):
-    def __init__(self):
+    def __init__(self, with_pc_comment=True, pc_gen=None):
         label = Label('tail_loop')
         instr_list = [
             label,
             J(label)
         ]
-        super().__init__(instr_list, False)
+        super().__init__(instr_list, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
+
+
+class ExcHandlerTemplate(Template):
+    class _MTC0SR(Instruction):
+        def __init__(self):
+            super().__init__(check_name=False)
+
+        def compile(self):
+            return 'mtc0 $0 $12'
+
+    def __init__(self, with_pc_comment=True, pc_gen=None):
+        mtc0_instr_list = [self._MTC0SR()]
+        super().__init__(mtc0_instr_list, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
+        with open('resource/exc_handler.asm', 'r') as f:
+            self._handler_asm = f.read()
+
+    def compile(self):
+        return self._handler_asm + '\n' + super().compile()
