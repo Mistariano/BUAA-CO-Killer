@@ -1,5 +1,6 @@
 from template import *
 from instruction import MIPS_LITE_WITHOUT_JUMP, MIPS_C3_SUBSET, MIPS_C4_SUBSET
+from task import Task
 import os
 import argparse
 
@@ -24,17 +25,13 @@ if __name__ == '__main__':
     with open('resource/exc_handler.asm', 'r') as f:
         exc_handler = f.read()
     for i in range(args.n):
+        task = Task(with_exc_handler=(args.instr_set == 'c4'))
         if args.template == 'random_k':
-            pc_gen = Template.get_pc_generator(0x3000)
-            exc_handler = ExcHandlerTemplate(pc_gen=pc_gen).compile()
-            rand_k = RandomKTemplate(instr_list, k=args.k, pc_gen=pc_gen).compile()
-            tail = TailTemplate(pc_gen=pc_gen).compile()
-            if args.instr_set == 'c4':
-                asm = exc_handler + '\n' + rand_k + '\n' + tail
-            else:
-                asm = rand_k + '\n' + tail
+            random_k_args = {'k': args.k, 'instr_set': instr_list}
+            task.add_template_class(RandomKTemplate, args=random_k_args)
         else:
             raise Exception('Template not found: no template named "{}"'.format(args.template))
+        asm = task.compile()
         # print(asm)
         if not os.path.exists('output'):
             os.mkdir('output')

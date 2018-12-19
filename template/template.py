@@ -3,10 +3,9 @@ from instruction import *
 
 
 class Template(Compilable):
-    def __init__(self, compilable_instances: list = None, with_pc_comment=True, pc_gen=None):
-        if not compilable_instances:
-            compilable_instances = []
+    def __init__(self, compilable_instances: list = None, with_pc_comment=True, pc_gen=None, args: dict = None):
         assert not with_pc_comment or pc_gen is not None
+        compilable_instances = self.initial_compilable_instances(compilable_instances, args)
         self.compilable_instances = []
         wrapper_cls = self._PCCommentWrapper
         for cmp in compilable_instances:
@@ -17,6 +16,11 @@ class Template(Compilable):
 
         self.with_pc_comment = with_pc_comment
         self.pc_gen = pc_gen
+
+    def initial_compilable_instances(self, compilable_instances, args: dict) -> list:
+        if not compilable_instances:
+            compilable_instances = []
+        return compilable_instances
 
     def compile(self):
         cmp_list = self.compilable_instances
@@ -48,25 +52,36 @@ class Template(Compilable):
 
 
 class RandomKTemplate(Template):
-    def __init__(self, compilable_set: list, k=100, with_pc_comment=True, pc_gen=None):
-        self.compilable_set = compilable_set
-        self.k = k
-        compilable_instances = \
-            [random.choice(self.compilable_set)() for _ in range(self.k)]
-        super().__init__(compilable_instances=compilable_instances, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
+    def initial_compilable_instances(self, compilable_instances, args):
+        compilable_set = args['instr_set']
+        k = args['k']
+        compilable_instances = [random.choice(compilable_set)() for _ in range(k)]
+        return compilable_instances
 
 
 class TailTemplate(Template):
-    def __init__(self, with_pc_comment=True, pc_gen=None):
+    def initial_compilable_instances(self, compilable_instances, args: dict):
         label = Label('tail_loop')
         instr_list = [
             label,
-            J(label)
+            J(label),
+            NOP()
         ]
-        super().__init__(instr_list, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
+        return instr_list
 
 
 class ExcHandlerTemplate(Template):
+
+    def __init__(self, with_pc_comment=True, pc_gen=None, args=None):
+        super().__init__(with_pc_comment=with_pc_comment, pc_gen=pc_gen, args=args)
+        with open('resource/exc_handler.asm', 'r') as f:
+            self._handler_asm = f.read()
+
+    def compile(self):
+        return self._handler_asm
+
+
+class COP0InitTemplate(Template):
     class _MTC0SR(Instruction):
         def __init__(self):
             super().__init__(check_name=False)
@@ -74,11 +89,8 @@ class ExcHandlerTemplate(Template):
         def compile(self):
             return 'mtc0 $0 $12'
 
-    def __init__(self, with_pc_comment=True, pc_gen=None):
-        mtc0_instr_list = [self._MTC0SR()]
-        super().__init__(mtc0_instr_list, with_pc_comment=with_pc_comment, pc_gen=pc_gen)
-        with open('resource/exc_handler.asm', 'r') as f:
-            self._handler_asm = f.read()
-
-    def compile(self):
-        return self._handler_asm + '\n' + super().compile()
+    def initial_compilable_instances(self, compilable_instances, args: dict):
+        instr_list = [
+            self._MTC0SR()
+        ]
+        return instr_list
