@@ -1,7 +1,7 @@
-from template import *
-from instruction import MIPS_LITE_WITHOUT_JUMP, MIPS_C3_SUBSET, MIPS_C4_SUBSET
-from task import Task
-import os
+from co_killer.compilable import *
+from co_killer.task import Task
+from co_killer import tester
+
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -22,18 +22,12 @@ if __name__ == '__main__':
     instr_list = MIPS_LITE_WITHOUT_JUMP if args.instr_set == 'lite' \
         else MIPS_C3_SUBSET if args.instr_set == 'c3' \
         else MIPS_C4_SUBSET
-    with open('resource/exc_handler.asm', 'r') as f:
-        exc_handler = f.read()
-    for i in range(args.n):
-        task = Task(with_exc_handler=(args.instr_set == 'c4'))
-        if args.template == 'random_k':
-            random_k_args = {'k': args.k, 'instr_set': instr_list}
-            task.add_template_class(RandomKTemplate, args=random_k_args)
-        else:
-            raise Exception('Template not found: no template named "{}"'.format(args.template))
-        asm = task.compile()
-        # print(asm)
-        if not os.path.exists('output'):
-            os.mkdir('output')
-        with open('output/rand{}.asm'.format(i), 'w') as f:
-            f.write(asm)
+    task = Task(repeat_time=args.n, output_dir='./output', with_exc_handler=(args.instr_set == 'c4'), name='rand')
+    if args.template == 'random_k':
+        random_k_args = {'k': args.k, 'instr_set': instr_list}
+        task.add_template_class(RandomKTemplate, args=random_k_args)
+    else:
+        raise Exception('Template not found: no template named "{}"'.format(args.template))
+    # task.run()
+    tester.add(task)
+    tester.run()

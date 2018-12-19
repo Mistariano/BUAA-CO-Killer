@@ -1,26 +1,34 @@
 import random
-from instruction import *
+from .instruction import *
+from .compilable import *
+import os
+from co_killer.global_configs import BASE_DIR
+from .instr_set import *
 
 
 class Template(Compilable):
     def __init__(self, compilable_instances: list = None, with_pc_comment=True, pc_gen=None, args: dict = None):
         assert not with_pc_comment or pc_gen is not None
-        compilable_instances = self.initial_compilable_instances(compilable_instances, args)
-        self.compilable_instances = []
-        wrapper_cls = self._PCCommentWrapper
-        for cmp in compilable_instances:
-            assert isinstance(cmp, Compilable)
-            if isinstance(cmp, Instruction) and with_pc_comment:
-                cmp = wrapper_cls(cmp, pc_gen)
-            self.compilable_instances.append(cmp)
-
+        if not compilable_instances:
+            compilable_instances = []
+        self.compilable_instances = compilable_instances
         self.with_pc_comment = with_pc_comment
         self.pc_gen = pc_gen
 
-    def initial_compilable_instances(self, compilable_instances, args: dict) -> list:
-        if not compilable_instances:
-            compilable_instances = []
-        return compilable_instances
+        self.initial_compilable_instances(args)
+        self._add_pc_comment_wrapper()
+
+    def _add_pc_comment_wrapper(self):
+        if not self.with_pc_comment:
+            return
+        cmp_list = self.compilable_instances
+        wrapper_cls = self._PCCommentWrapper
+        pc_gen = self.pc_gen
+        self.compilable_instances = [wrapper_cls(cmp, pc_gen) if isinstance(cmp, Instruction) else cmp for cmp in
+                                     cmp_list]
+
+    def initial_compilable_instances(self, args: dict):
+        pass
 
     def compile(self):
         cmp_list = self.compilable_instances
@@ -52,15 +60,24 @@ class Template(Compilable):
 
 
 class RandomKTemplate(Template):
-    def initial_compilable_instances(self, compilable_instances, args):
-        compilable_set = args['instr_set']
-        k = args['k']
-        compilable_instances = [random.choice(compilable_set)() for _ in range(k)]
-        return compilable_instances
+    """
+    Randomly choice args['k'] compilable objects from args['instr_set']
+    """
+
+    def __init__(self, compilable_instances=None, with_pc_comment=True, pc_gen=None, args=None):
+        super().__init__(compilable_instances=compilable_instances, with_pc_comment=with_pc_comment, pc_gen=pc_gen,
+                         args=args)
+        self._compilable_set = args['instr_set']
+        self._k = args['k']
+
+    def compile(self):
+        self.compilable_instances = [random.choice(self._compilable_set) for _ in range(self._k)]
+        self._add_pc_comment_wrapper()
+        return super().compile()
 
 
 class TailTemplate(Template):
-    def initial_compilable_instances(self, compilable_instances, args: dict):
+    def initial_compilable_instances(self, args: dict):
         label = Label('tail_loop')
         instr_list = [
             label,
@@ -74,7 +91,8 @@ class ExcHandlerTemplate(Template):
 
     def __init__(self, with_pc_comment=True, pc_gen=None, args=None):
         super().__init__(with_pc_comment=with_pc_comment, pc_gen=pc_gen, args=args)
-        with open('resource/exc_handler.asm', 'r') as f:
+        exc_handler_path = os.path.join(BASE_DIR, 'resource/exc_handler.asm')
+        with open(exc_handler_path, 'r') as f:
             self._handler_asm = f.read()
 
     def compile(self):
@@ -89,8 +107,12 @@ class COP0InitTemplate(Template):
         def compile(self):
             return 'mtc0 $0 $12'
 
-    def initial_compilable_instances(self, compilable_instances, args: dict):
+    def initial_compilable_instances(self, args: dict):
         instr_list = [
             self._MTC0SR()
         ]
         return instr_list
+
+
+if __name__ == '__main__':
+    print(ExcHandlerTemplate(with_pc_comment=False).compile())

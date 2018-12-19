@@ -1,9 +1,5 @@
-from utils.placeholder import Placeholder
-
-
-class Compilable:
-    def compile(self):
-        raise NotImplementedError('Should implement compile() of a Compilable')
+from co_killer.util.placeholder import Placeholder
+from .compilable import Compilable
 
 
 class Instruction(Compilable):
@@ -13,9 +9,6 @@ class Instruction(Compilable):
         if check_name and self.__class__.__name__.lower() != self.name.lower():
             raise Warning('self.name != class_name:', self.name, self.__class__)
         self.has_pc = has_pc
-
-    def get_pc_cnt(self):
-        return 1
 
     def __str__(self):
         return self.compile()

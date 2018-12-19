@@ -1,4 +1,4 @@
-from instruction.instruction import *
+from co_killer.compilable.instruction import *
 
 
 class NOP(Instruction):
@@ -245,7 +245,7 @@ class MTLO(LOHIFormatInstr):
 
 MIPS_LITE_WITHOUT_JUMP = [NOP, ADDU, SUBU, ORI, LW, SW]
 
-MIPS_C3_SUBSET = [
+MIPS_C3_SUBSET = [instr() for instr in [
     LB, LBU, LH, LHU, LW,  # 1-5
     SB, SH, SW,  # 6-8
     # ADD, SUB # 9, 11
@@ -258,14 +258,14 @@ MIPS_C3_SUBSET = [
     ADDIU, ANDI, ORI, XORI, LUI,  # 28-32
     SLTI, SLTIU, SLT, SLTU,  # 33-36
     MFHI, MFLO, MTHI, MTLO,  # 47-50
-]
+]]
 
-MIPS_C4_SUBSET = MIPS_C3_SUBSET + [
+MIPS_C4_SUBSET = MIPS_C3_SUBSET + [instr() for instr in [
     ADD, SUB,  # 9, 11
     ADDI,  # 27
     SHNotAligned, SWNotAligned,
     LHNotAligned, LWNotAligned
-]
+]]
 
 if __name__ == '__main__':
     for instr in MIPS_LITE_WITHOUT_JUMP:
