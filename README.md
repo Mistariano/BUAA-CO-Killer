@@ -16,24 +16,33 @@
 
 ## 安装与运行
 
+注意版本已更新，与先前版本启动方式不同
+
 ```bash
 # Download
 git clone https://github.com/Mistariano/BUAA-CO-Killer.git
+cd BUAA-CO-Killer
 
-# Install as a script 
-# Stay tuned...
+# Install
+python setup.py install
+
+# Check installation & show helps
+coklr.py -h
+```
+
+```bash
 
 # Run with default settings
-python main.py
-
-# Show helps
-python main.py -h
+coklr.py <output_dir>
 
 # Generate 100 asm files, with 1023 instructions in each of them
-python main.py --n_case 100 --k_instr 1023
+coklr.py <output_dir> main.py --n_case 100 --k_instr 1023
+
+# Generate test cases for P5(on MIPS-LITE)
+coklr.py <output_dir> --instr_set lite
 
 # Generate test cases for P6(on MIPS-C3)
-python main.py --instr_set c3
+coklr.py <output_dir> --instr_set c3
 ```
 
 ## 支持指令
@@ -91,9 +100,26 @@ python main.py --instr_set c3
 49.	MTHI
 50.	MTLO
 
-## 自定义测试
+## 自定义
 
-尚未完成，目前可以尝试直接修改/添加源码实现自定义测试（包括分支跳转等指令的测试）
+1. 自定义模板类：继承Template并重载`initial_compilable_instances`
+2. 自定义Task：
+    1. `from co_killer.task import Task`
+    2. 实例化一个`Task`，并使用`add_template_class`将模板类挂载入Task
+3. 运行：调用task对象的`run`方法
+
+示例：随机生成100*1000条P7测试指令
+```python
+from co_killer.task import Task
+from co_killer.compilable import RandomKTemplate, instr_set
+
+
+if __name__ == '__main__':
+    task = Task(output_dir='./out', repeat_time=100, name='rand')
+    task.add_template_class(template_cls=RandomKTemplate,  args={'k': 1000, 'instr_set': instr_set.MIPS_C4_SUBSET})
+    task.run()
+```
+
 
 ### 添加指令
 
