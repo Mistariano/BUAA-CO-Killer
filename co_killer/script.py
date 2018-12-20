@@ -19,7 +19,8 @@ parser.add_argument(dest='output_dir', type=str, metavar='output_dir')
 
 args = parser.parse_args()
 
-if __name__ == '__main__':
+
+def main():
     instr_list = MIPS_LITE_WITHOUT_JUMP if args.instr_set == 'lite' \
         else MIPS_C3_SUBSET if args.instr_set == 'c3' \
         else MIPS_C4_SUBSET
@@ -32,3 +33,7 @@ if __name__ == '__main__':
     # task.run()
     tester.add(task)
     tester.run()
+
+
+if __name__ == '__main__':
+    main()

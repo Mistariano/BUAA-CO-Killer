@@ -30,22 +30,22 @@ cd BUAA-CO-Killer
 python setup.py install
 
 # Check installation & show helps
-coklr.py -h
+coklr -h
 ```
 
 ```bash
 
 # Run with default settings
-coklr.py <output_dir>
+coklr <output_dir>
 
 # Generate 100 asm files, with 1023 instructions in each of them
-coklr.py <output_dir> --n_case 100 --k_instr 1023
+coklr <output_dir> --n_case 100 --k_instr 1023
 
 # Generate test cases for P5(on MIPS-LITE)
-coklr.py <output_dir> --instr_set lite
+coklr <output_dir> --instr_set lite
 
 # Generate test cases for P6(on MIPS-C3)
-coklr.py <output_dir> --instr_set c3
+coklr <output_dir> --instr_set c3
 ```
 
 ## 支持指令
