@@ -39,7 +39,7 @@ coklr.py -h
 coklr.py <output_dir>
 
 # Generate 100 asm files, with 1023 instructions in each of them
-coklr.py <output_dir> main.py --n_case 100 --k_instr 1023
+coklr.py <output_dir> --n_case 100 --k_instr 1023
 
 # Generate test cases for P5(on MIPS-LITE)
 coklr.py <output_dir> --instr_set lite
@@ -103,9 +103,9 @@ coklr.py <output_dir> --instr_set c3
 49.	MTHI
 50.	MTLO
 
-## 自定义
+## 编写自己的测试脚本
 
-1. 自定义模板类：继承Template并重载`initial_compilable_instances`
+1. 自定义模板：继承Template并重载`initial_compilable_instances`
 2. 自定义Task：
     1. `from co_killer.task import Task`
     2. 实例化一个`Task`，并使用`add_template_class`将模板类挂载入Task
@@ -124,20 +124,17 @@ if __name__ == '__main__':
 ```
 
 
-### 添加指令
 
-1. 声明一个指令类，集成instruction.Instruction，并将其name属性设为类名小写
-2. 重载__init__方法，如果需要自动随机生成，使用utils.Placeholder定义相应字段
-3. 在instr_set中将新指令加入已存在的指令级，或新建指令集
-
-### 添加自定义代码模板
-
-1. 声明一个模板类，继承template.Template
-2. 重载compile方法，返回一个字符串
 
 ## 自动化测试：多进程、调度器及任务队列
 
 stay tuned
+
+## Contribution
+
+我需要一波文档、注释、Bug Report
+
+随便开issue就好，怎么PR都行
 
 ## 软件许可协议
 
