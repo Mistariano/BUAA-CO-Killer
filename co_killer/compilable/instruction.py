@@ -3,15 +3,19 @@ from .compilable import Compilable
 
 
 class Instruction(Compilable):
+    """
+    指令基类，继承时需要指定子类的name属性
+    """
     name = 'BASE_INSTRUMENT'
 
-    def __init__(self, check_name=True, has_pc=True):
+    def __init__(self, check_name=True):
+        """
+        构造函数
+
+        :param check_name: 是否检查类名与name属性一致性，默认检查
+        """
         if check_name and self.__class__.__name__.lower() != self.name.lower():
             raise Warning('self.name != class_name:', self.name, self.__class__)
-        self.has_pc = has_pc
-
-    def __str__(self):
-        return self.compile()
 
     def compile(self):
         raise NotImplementedError('Should implement compile() of an Instruction!')
