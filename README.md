@@ -8,7 +8,7 @@
 
 开发中，**非常欢迎contribution**，包括但不限于issue、bug report
 
-作者的课设当前进度：P7
+作者的课设当前进度：P8
 
 环境依赖：
 - Python 3.5 3.6 3.7
@@ -88,8 +88,8 @@ coklr <output_dir> --instr_set c3
 34.	SLTIU
 35.	SLT
 36.	SLTU
-37.	BEQ*
-38.	BNE*
+37.	BEQ
+38.	BNE
 39.	BLEZ*
 40.	BGTZ*
 41.	BLTZ*
@@ -105,7 +105,7 @@ coklr <output_dir> --instr_set c3
 
 ## 编写自己的测试脚本
 
-1. 自定义模板：继承Template并重载`initial_compilable_instances`
+1. 自定义模板：继承Template并重载`get_initial_compilable_instances`
 2. 自定义Task：
     1. `from co_killer.task import Task`
     2. 实例化一个`Task`，并使用`add_template_class`将模板类挂载入Task

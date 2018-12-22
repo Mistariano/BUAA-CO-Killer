@@ -1,4 +1,5 @@
 from co_killer.compilable.instruction import *
+from .template import Template
 
 
 class NOP(Instruction):
@@ -216,7 +217,27 @@ class SLTU(RFormatInstr):
     name = 'sltu'
 
 
-# 37...
+# 37
+class BEQ(BEQFormatInstr):
+    name = 'beq'
+
+
+class BranchDelayExceptionTestTemplate(Template):
+
+    def get_initial_compilable_instances(self, args: dict):
+        label = Label('branch_delay_exception_test_end')
+        cmp_list = [
+            LUI(10, '0x3fff'),
+            BEQ(0, 0, label),
+            ADDI(10, 10, 1)
+        ]
+        return cmp_list
+
+
+# 38
+class BNE(BEQFormatInstr):
+    name = 'bne'
+
 
 # 43
 class J(JFormatInstr):

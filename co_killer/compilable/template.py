@@ -15,7 +15,8 @@ class Template(Compilable):
         self.with_pc_comment = with_pc_comment
         self.pc_gen = pc_gen
 
-        self.initial_compilable_instances(args)
+        self.compilable_instances = self.get_initial_compilable_instances(args)
+        assert self.compilable_instances is not None
         self._add_pc_comment_wrapper()
 
     def _add_pc_comment_wrapper(self):
@@ -27,8 +28,8 @@ class Template(Compilable):
         self.compilable_instances = [wrapper_cls(cmp, pc_gen) if isinstance(cmp, Instruction) else cmp for cmp in
                                      cmp_list]
 
-    def initial_compilable_instances(self, args: dict):
-        pass
+    def get_initial_compilable_instances(self, args: dict):
+        return self.compilable_instances
 
     def compile(self):
         cmp_list = self.compilable_instances
@@ -91,14 +92,14 @@ class RandomKTemplate(Template):
 
 
 class TailTemplate(Template):
-    def initial_compilable_instances(self, args: dict):
+    def get_initial_compilable_instances(self, args: dict):
         label = Label('tail_loop')
         instr_list = [
             label,
             J(label),
             NOP()
         ]
-        self.compilable_instances = instr_list
+        return instr_list
 
 
 class ExcHandlerTemplate(Template):
@@ -121,11 +122,11 @@ class COP0InitTemplate(Template):
         def compile(self):
             return 'mtc0 $0 $12'
 
-    def initial_compilable_instances(self, args: dict):
+    def get_initial_compilable_instances(self, args: dict):
         instr_list = [
             self._MTC0SR()
         ]
-        self.compilable_instances = instr_list
+        return instr_list
 
 
 if __name__ == '__main__':

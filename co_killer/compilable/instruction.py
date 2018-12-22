@@ -216,3 +216,28 @@ class LOHIFormatInstr(Instruction):
 
     def compile(self):
         return '{} ${}'.format(self.name, self.rt.compile())
+
+
+class BEQFormatInstr(Instruction):
+    name = 'DEFAULT_BEQ'
+
+    def __init__(self, rs: int, rt: int, label: Label):
+        super().__init__()
+        self.rs = rs
+        self.rt = rt
+        self.label = label
+
+    def compile(self):
+        return '{} ${} ${} {}'.format(self.name, self.rs, self.rt, self.label.get_label())
+
+
+class BZeroFormatInstr(Instruction):
+    name = 'DEFAULT_BZero'
+
+    def __init__(self, rs: int, label: Label):
+        super().__init__()
+        self.rs = rs
+        self.label = label
+
+    def compile(self):
+        return '{} ${} {}'.format(self.name, self.rs, self.label.get_label())
