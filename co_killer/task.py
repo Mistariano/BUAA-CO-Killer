@@ -1,9 +1,14 @@
-from co_killer.compilable import *
+# from .compilable import *
+
 import os
+
+from .builtin import templates
+from .compilable.compilable import Compilable
+from .compilable.template import COP0InitTemplate, Template, TailTemplate
 
 
 class Task:
-    def __init__(self, output_dir, repeat_time=1, with_exc_handler=True, with_pc_comment=True, name=None):
+    def __init__(self, output_dir, repeat_time=1, builtin_exc_handler: str = None, with_pc_comment=True, name=None):
         if not name:
             name = 'Task_' + str(id(self))
         self.name = name
@@ -11,14 +16,14 @@ class Task:
         self._repeat_time = repeat_time
         self._output_dir = output_dir
         self.templates = []
-        self._text_pc_gen = get_pc_generator(0x3000) if with_pc_comment else None
-        self._ktext_pc_gen = get_pc_generator(0x4180) if with_pc_comment else None
+        self._text_pc_gen = self._get_pc_generator(0x3000) if with_pc_comment else None
+        self._ktext_pc_gen = self._get_pc_generator(0x4180) if with_pc_comment else None
 
         self._with_pc_comment = with_pc_comment
 
-        if with_exc_handler:
-            self.add_template_class(ExcHandlerTemplate, True)
-
+        assert builtin_exc_handler in ['p7', 'p8'] or builtin_exc_handler is None
+        if builtin_exc_handler is not None:
+            self.add_template_class(templates.BuiltinExcHandlerTemplate, True, args={'handler': builtin_exc_handler})
             self.add_template_class(COP0InitTemplate)
 
         # print('Initialized Task', name, '...')
@@ -40,7 +45,14 @@ class Task:
     def run(self):
         self.output_asm()
 
-    def add_template_class(self, template_cls, use_ktext_pc_gen=False, args=None):
+    def add_template_class(self, template_cls, use_ktext_pc_gen: bool = False, args: dict = None) -> None:
+        """
+        Add a template class into the task
+
+        :param template_cls: the template class, NOT AN INSTANCE
+        :param use_ktext_pc_gen: whether to use the ktext's pc counter instead of text
+        :param args: arguments
+        """
         assert issubclass(template_cls, Template)
         pc_gan = self._text_pc_gen if not use_ktext_pc_gen else self._ktext_pc_gen
         try:
@@ -50,6 +62,14 @@ class Task:
             raise e
 
         self.templates.append(template_instance)
+
+    def add_handler_template_class(self, template_cls, args: dict = None) -> None:
+        """
+        Add a handler template class into the task
+        :param template_cls: the template class, NOT AN INSTANCE
+        :param args: arguments
+        """
+        self.add_template_class(template_cls=template_cls, use_ktext_pc_gen=True, args=args)
 
     def add_compilable_sequence(self, cmp_seq: list, use_ktext_pc_gen=False):
         with_pc_comments = self._with_pc_comment
@@ -63,3 +83,27 @@ class Task:
 
     def add_compilable(self, cmp: Compilable, use_ktext_pc_gen=False):
         self.add_compilable_sequence([cmp], use_ktext_pc_gen)
+
+    @staticmethod
+    def _get_pc_generator(pc_start):
+        def pc_gen(start):
+            cur = start
+            while True:
+                yield cur
+                cur += 4
+
+        class RestartableGen:
+            def __init__(self, start):
+                self._pc_gen = pc_gen(start)
+                self._pc_start = start
+
+            def reset(self):
+                self._pc_gen = pc_gen(self._pc_start)
+
+            def __iter__(self):
+                return self._pc_gen
+
+            def __next__(self):
+                return self._pc_gen.__next__()
+
+        return RestartableGen(pc_start)

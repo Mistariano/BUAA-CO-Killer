@@ -1,5 +1,4 @@
 from co_killer.compilable.instruction import *
-# from .template import Template
 
 
 class NOP(Instruction):
@@ -221,18 +220,6 @@ class SLTU(RFormatInstr):
 class BEQ(BEQFormatInstr):
     name = 'beq'
 
-'''
-class BranchDelayExceptionTestTemplate(Template):
-
-    def get_initial_compilable_instances(self, args: dict):
-        label = Label('branch_delay_exception_test_end')
-        cmp_list = [
-            LUI(10, '0x3fff'),
-            BEQ(0, 0, label),
-            ADDI(10, 10, 1)
-        ]
-        return cmp_list
-'''
 
 # 38
 class BNE(BEQFormatInstr):
@@ -264,30 +251,5 @@ class MTLO(LOHIFormatInstr):
     name = 'mtlo'
 
 
-MIPS_LITE_WITHOUT_JUMP = [NOP, ADDU, SUBU, ORI, LW, SW]
-
-MIPS_C3_SUBSET = [instr() for instr in [
-    LB, LBU, LH, LHU, LW,  # 1-5
-    SB, SH, SW,  # 6-8
-    # ADD, SUB # 9, 11
-    ADDU, SUBU,  # 10, 12
-    MULT, MULTU,  # 13,14
-    # DIV, DIVU,  # 15,16
-    SLL, SRL, SRA, SLLV, SRLV, SRAV,  # 17-22
-    AND, OR, XOR, NOR,  # 23-26
-    # ADDI, 27
-    ADDIU, ANDI, ORI, XORI, LUI,  # 28-32
-    SLTI, SLTIU, SLT, SLTU,  # 33-36
-    MFHI, MFLO, MTHI, MTLO,  # 47-50
-]]
-
-MIPS_C4_SUBSET = MIPS_C3_SUBSET + [instr() for instr in [
-    ADD, SUB,  # 9, 11
-    ADDI,  # 27
-    SHNotAligned, SWNotAligned,
-    LHNotAligned, LWNotAligned
-]]
-
 if __name__ == '__main__':
-    for instr in MIPS_LITE_WITHOUT_JUMP:
-        print(instr())
+    pass

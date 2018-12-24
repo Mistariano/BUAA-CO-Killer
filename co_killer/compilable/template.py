@@ -1,77 +1,62 @@
 import random
-from .instruction import *
-from .compilable import *
-import os
-from co_killer.global_configs import BASE_DIR
-from .instr_set import *
+
+import co_killer.builtin.instructions as builtin
+from . import Instruction, Compilable, Comment, Label
 
 
 class Template(Compilable):
-    def __init__(self, compilable_instances: list = None, with_pc_comment=True, pc_gen=None, args: dict = None):
+    def __init__(self, compilable_instances: list = None, with_pc_comment=False, pc_gen=None, args: dict = None):
         assert not with_pc_comment or pc_gen is not None
         if not compilable_instances:
             compilable_instances = []
-        self.compilable_instances = compilable_instances
-        self.with_pc_comment = with_pc_comment
-        self.pc_gen = pc_gen
+        self._compilable_instances = compilable_instances
+        self._with_pc_comment = with_pc_comment
+        self._pc_gen = pc_gen
 
-        self.compilable_instances = self.get_initial_compilable_instances(args)
-        assert self.compilable_instances is not None
+        self._compilable_instances = self.get_initial_compilable_instances()
+        assert self._compilable_instances is not None
         self._add_pc_comment_wrapper()
 
     def _add_pc_comment_wrapper(self):
-        if not self.with_pc_comment:
+        if not self._with_pc_comment:
             return
-        cmp_list = self.compilable_instances
+        cmp_list = []
         wrapper_cls = self._PCCommentWrapper
-        pc_gen = self.pc_gen
-        self.compilable_instances = [wrapper_cls(cmp, pc_gen) if isinstance(cmp, Instruction) else cmp for cmp in
-                                     cmp_list]
+        pc_gen = self._pc_gen
+        with_pc_comment = self._with_pc_comment
+        for cmp in self._compilable_instances:
+            if isinstance(cmp, Instruction):
+                cmp_list.append(wrapper_cls(cmp, pc_gen))
+            elif isinstance(cmp, Template):
+                cmp.reset_pc_gen(with_pc_comment, pc_gen)
+                cmp._add_pc_comment_wrapper()
+                cmp_list.append(cmp)
+            else:
+                cmp_list.append(cmp)
+        self._compilable_instances = cmp_list
 
-    def get_initial_compilable_instances(self, args: dict):
-        return self.compilable_instances
+    def get_initial_compilable_instances(self):
+        return self._compilable_instances
 
     def compile(self):
-        cmp_list = self.compilable_instances
+        cmp_list = self._compilable_instances
         return '\n'.join([cmp.compile() for cmp in cmp_list])
 
+    def reset_pc_gen(self, with_pc_comment, pc_gen):
+        self._with_pc_comment = with_pc_comment
+        self._pc_gen = pc_gen
+
+    @NotImplementedError
     def append(self, compilable: Compilable):
-        if self.with_pc_comment and isinstance(compilable, Instruction):
-            self.compilable_instances.append(self._PCCommentWrapper(compilable, self.pc_gen))
-        else:
-            self.compilable_instances.append(compilable)
+        pass
 
     class _PCCommentWrapper(Compilable):
-        def __init__(self, _instr: Instruction, pc_gen):
-            self._comment = Comment(hex(next(pc_gen)))
-            self._instr = _instr
+        def __init__(self, instr: Instruction, pc_gen):
+            self._pc_gen = pc_gen
+            self._instr = instr
 
         def compile(self):
-            return self._comment.compile() + '\n' + self._instr.compile()
-
-    @staticmethod
-    def get_pc_generator(pc_start):
-        def pc_gen(start):
-            cur = start
-            while True:
-                yield cur
-                cur += 4
-
-        class RestartableGen:
-            def __init__(self, start):
-                self._pc_gen = pc_gen(start)
-                self._pc_start = start
-
-            def reset(self):
-                self._pc_gen = pc_gen(self._pc_start)
-
-            def __iter__(self):
-                return self._pc_gen
-
-            def __next__(self):
-                return self._pc_gen.__next__()
-
-        return RestartableGen(pc_start)
+            return Comment(hex(next(self._pc_gen))).compile() + '\n' + self._instr.compile()
 
 
 class RandomKTemplate(Template):
@@ -79,39 +64,27 @@ class RandomKTemplate(Template):
     Randomly choice args['k'] compilable objects from args['instr_set']
     """
 
-    def __init__(self, compilable_instances=None, with_pc_comment=True, pc_gen=None, args=None):
+    def __init__(self, compilable_instances=None, with_pc_comment=False, pc_gen=None, args=None):
         super().__init__(compilable_instances=compilable_instances, with_pc_comment=with_pc_comment, pc_gen=pc_gen,
                          args=args)
         self._compilable_set = args['instr_set']
         self._k = args['k']
 
     def compile(self):
-        self.compilable_instances = [random.choice(self._compilable_set) for _ in range(self._k)]
+        self._compilable_instances = [random.choice(self._compilable_set)() for _ in range(self._k)]
         self._add_pc_comment_wrapper()
         return super().compile()
 
 
 class TailTemplate(Template):
-    def get_initial_compilable_instances(self, args: dict):
+    def get_initial_compilable_instances(self):
         label = Label('tail_loop')
         instr_list = [
             label,
-            J(label),
-            NOP()
+            builtin.J(label),
+            builtin.NOP()
         ]
         return instr_list
-
-
-class ExcHandlerTemplate(Template):
-
-    def __init__(self, with_pc_comment=True, pc_gen=None, args=None):
-        super().__init__(with_pc_comment=with_pc_comment, pc_gen=pc_gen, args=args)
-        exc_handler_path = os.path.join(BASE_DIR, 'resource/exc_handler.asm')
-        with open(exc_handler_path, 'r') as f:
-            self._handler_asm = f.read()
-
-    def compile(self):
-        return self._handler_asm
 
 
 class COP0InitTemplate(Template):
@@ -122,12 +95,20 @@ class COP0InitTemplate(Template):
         def compile(self):
             return 'mtc0 $0 $12'
 
-    def get_initial_compilable_instances(self, args: dict):
+    def get_initial_compilable_instances(self):
         instr_list = [
             self._MTC0SR()
         ]
         return instr_list
 
 
+class ExcHandlerTemplate(Template):
+    def get_initial_compilable_instances(self):
+        raise NotImplementedError
+
+    def compile(self):
+        return '\n'.join(['.ktext 0x4180:', super().compile(), '.text:'])
+
+
 if __name__ == '__main__':
-    print(ExcHandlerTemplate(with_pc_comment=False).compile())
+    pass

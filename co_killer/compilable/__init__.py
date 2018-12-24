@@ -1,5 +1,3 @@
-from .instruction import *
-from .template import *
-from .instr_set import *
-
-get_pc_generator = Template.get_pc_generator
+from .compilable import Compilable, BlankLine, Label, Comment
+from .instruction import Instruction
+from .template import Template, RandomKTemplate, ExcHandlerTemplate
