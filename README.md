@@ -109,21 +109,86 @@ coklr <output_dir> --instr_set c3
 2. 自定义Task：
     1. `from co_killer.task import Task`
     2. 实例化一个`Task`，并使用`add_template_class`将模板类挂载入Task
-3. 运行：调用task对象的`run`方法
+3. 运行：调用`Task`对象的`run`方法
 
-示例：随机生成100*1000条P7测试指令
+示例：自定义模板并定义自己的`Task`
+
 ```python
 from co_killer.task import Task
-from co_killer.compilable import RandomKTemplate, instr_set
+from co_killer.compilable import ExcHandlerTemplate, Template
+from co_killer.builtin.instructions import *
+
+
+class MyExcHandlerTemplate(ExcHandlerTemplate):
+    def get_initial_compilable_instances(self):
+        instr_seq = [
+            # add your instructions here
+            ADDI(rs=0, rt=0, imm=0),
+            NOP(),
+        ]
+        return instr_seq
+
+
+class MyASMTextTemplate(Template):
+    def get_initial_compilable_instances(self):
+        instr_seq = [
+            # add your instructions here
+            ORI(),
+            ORI(),
+            ORI(),
+            ORI(),
+        ]
+        return instr_seq
+
+
+def get_task():
+    task = Task(output_dir='output',
+                repeat_time=5,
+                builtin_exc_handler=None,
+                name='my_task'
+                )
+
+    task.add_handler_template_class(template_cls=MyExcHandlerTemplate)
+    task.add_template_class(template_cls=MyASMTextTemplate)
+    return task
+
+
+def main():
+    task = get_task()
+    task.run()
 
 
 if __name__ == '__main__':
-    task = Task(output_dir='./out', repeat_time=100, name='rand')
-    task.add_template_class(template_cls=RandomKTemplate,  args={'k': 1000, 'instr_set': instr_set.MIPS_C4_SUBSET})
-    task.run()
+    main()
+
 ```
 
+注意，当不给`ORI`或其他内建指令指定参数时，将会使用安全的随机值
 
+上述代码生成5个测试文件，其中一个内容如下：
+```
+.ktext 0x4180:
+# 0x4180
+addi $22 $16 -5569
+# 0x4184
+nop
+.text:
+
+# 0x3000
+ori $19 $16 0xd311
+# 0x3004
+ori $26 $5 0x245d
+# 0x3008
+ori $24 $19 0x6b15
+# 0x300c
+ori $4 $7 0x52bf
+
+tail_loop_0:
+# 0x3010
+j tail_loop_0
+# 0x3014
+nop
+```
 
 
 ## 自动化测试：多进程、调度器及任务队列
