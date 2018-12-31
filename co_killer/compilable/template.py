@@ -88,11 +88,33 @@ class TailTemplate(Template):
 
 
 class ExcHandlerTemplate(Template):
+    def __init__(self, compilable_instances: list = None, with_pc_comment=False, pc_gen=None, args: dict = None):
+        """
+        the exception handler template
+
+        :param compilable_instances: compilable instances
+        :param with_pc_comment: whether to add the comment
+        :param pc_gen: the generator
+        :param args: args['exc_entry'] is needed. default to 0x4180
+        """
+        super().__init__(compilable_instances, with_pc_comment, pc_gen, args)
+        if args is not None and 'exc_entry' in args.keys():
+            exc_entry = args['exc_entry']
+            assert isinstance(exc_entry, int) or isinstance(exc_entry, str)
+            if isinstance(exc_entry, int):
+                exc_entry = str(hex(exc_entry))
+            else:
+                if exc_entry[:2] != '0x':
+                    exc_entry = '0x' + exc_entry
+            self.exc_entry = exc_entry
+        else:
+            self.exc_entry = '0x4180'
+
     def get_initial_compilable_instances(self):
         raise NotImplementedError
 
     def compile(self):
-        return '\n'.join(['.ktext 0x4180:', super().compile(), '.text:'])
+        return '\n'.join(['.ktext ' + self.exc_entry, super().compile(), '.text:'])
 
 
 if __name__ == '__main__':
