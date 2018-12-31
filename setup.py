@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='co_killer',
-    version='0.4',
+    version='0.5',
     packages=['co_killer', 'co_killer.util', 'co_killer.compilable', 'co_killer.builtin'],
     url='https://github.com/Mistariano/BUAA-CO-Killer',
     license='GPL-3.0',
