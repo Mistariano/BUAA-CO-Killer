@@ -2,14 +2,16 @@ import random
 
 
 class Placeholder:
-    def __init__(self, value=None, range=None, radix='dec'):
+    def __init__(self, is_random, value=None, range=None, radix='dec'):
         """
 
         :param value: The value of the holder. If none, will be a random value
         :param range: 'reg', 3, 4, 5, 14, 15, 16, 32
         :param radix: 'dec' for signed decimal, 'hex' for unsigned hexadecimal
         """
-
+        assert not is_random or value is not None
+        if is_random:
+            value = None
         if not range:
             range = 'reg'
         assert range in ['reg', 3, 4, 5, 14, 15, 16, 32] or isinstance(range, list)
@@ -20,7 +22,10 @@ class Placeholder:
 
     def compile(self):
         if self.value:
-            return self.value
+            if isinstance(self.value, Placeholder):
+                return self.value.compile()
+            else:
+                return self.value
         radix = self.radix
         return self._get_rand_hex() if radix == 'hex' else self._get_rand_dec()
 

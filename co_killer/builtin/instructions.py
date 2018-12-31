@@ -28,7 +28,7 @@ class LH(SLFormatInstr):
 
 class LHNotAligned(LH):
     def __init__(self):
-        super().__init__(aligned_mode=False, check_name=False)
+        super().__init__(safe_mode=True, use_smaller_mem=True, aligned_mode=False, check_name=False)
 
 
 # 4
@@ -45,7 +45,7 @@ class LW(SLFormatInstr):
 
 class LWNotAligned(LW):
     def __init__(self):
-        super().__init__(aligned_mode=False, check_name=False)
+        super().__init__(safe_mode=True, use_smaller_mem=True, aligned_mode=False, check_name=False)
 
 
 # 6
@@ -62,7 +62,7 @@ class SH(SLFormatInstr):
 
 class SHNotAligned(SH):
     def __init__(self):
-        super().__init__(aligned_mode=False, check_name=False)
+        super().__init__(safe_mode=True, use_smaller_mem=True, aligned_mode=False, check_name=False)
 
 
 # 8
@@ -73,7 +73,7 @@ class SW(SLFormatInstr):
 
 class SWNotAligned(SW):
     def __init__(self):
-        super().__init__(aligned_mode=False, check_name=False)
+        super().__init__(safe_mode=True, use_smaller_mem=True, aligned_mode=False, check_name=False)
 
 
 # 9
@@ -250,6 +250,10 @@ class MTHI(LOHIFormatInstr):
 class MTLO(LOHIFormatInstr):
     name = 'mtlo'
 
+
+_safe_cls_wrapper = SafeSLFormatInstr.get_safe_sl_class
+
+safe_sl_classes = [_safe_cls_wrapper(cls) for cls in [SW, SH, SB, LW, LH, LHU, LB, LBU]]
 
 if __name__ == '__main__':
     pass

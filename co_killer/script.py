@@ -1,10 +1,10 @@
 import argparse
 
+from co_killer import tester
 from co_killer.builtin.instruction_set import InstructionSetMgr
-from . import tester
-from .builtin.templates import BranchDelaySlotExcTemplate
-from .compilable import *
-from .task import Task
+from co_killer.builtin.templates import BranchDelaySlotExcTemplate
+from co_killer.compilable import *
+from co_killer.task import Task
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-k', '--k_instr', dest='k', type=int, metavar='k', default=1000,

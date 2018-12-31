@@ -8,8 +8,8 @@ class InstructionSetMgr:
     ]
 
     _50_INSTRUCTIONS_WITHOUT_XALU = [
-        LB, LBU, LH, LHU, LW,  # 1-5
-        SB, SH, SW,  # 6-8
+                                        # LB, LBU, LH, LHU, LW,  # 1-5
+                                        # SB, SH, SW,  # 6-8
         # ADD, SUB # 9, 11
         ADDU, SUBU,  # 10, 12
         # MULT, MULTU, DIV, DIVU,  # 13,14,15,16
@@ -18,7 +18,7 @@ class InstructionSetMgr:
         # ADDI, 27
         ADDIU, ANDI, ORI, XORI, LUI,  # 28-32
         SLTI, SLTIU, SLT, SLTU,  # 33-36
-    ]
+                                    ] + safe_sl_classes
 
     _EXCEPTION_INSTRUCTIONS = [
         ADD, SUB,  # 9, 11
