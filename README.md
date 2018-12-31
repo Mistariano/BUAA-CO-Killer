@@ -19,7 +19,7 @@
 注意版本已更新，与先前版本启动方式不同
 
 目前已知问题：
-- 在Py3.5的安装路径中如果含有中文等特殊字符会安装失败，如果遇到这个问题直接运行`coklr.py`脚本即可。其他版本的Python很可能也存在这个问题
+- 在Py3.5的安装路径中如果含有中文等特殊字符会安装失败，如果遇到这个问题直接运行`coklr`脚本即可。其他版本的Python很可能也存在这个问题
 
 ```bash
 # Download
@@ -66,8 +66,8 @@ coklr <output_dir> --instr_set c3
 12.	SUBU
 13.	MULT
 14.	MULTU
-15.	DIV*
-16.	DIVU*
+15.	DIV
+16.	DIVU
 17.	SLL
 18.	SRL
 19.	SRA
@@ -90,18 +90,21 @@ coklr <output_dir> --instr_set c3
 36.	SLTU
 37.	BEQ
 38.	BNE
-39.	BLEZ*
-40.	BGTZ*
-41.	BLTZ*
-42.	BGEZ*
-43.	J*
-44.	JAL*
-45.	JR*
-46.	JALR*
+39.	BLEZ
+40.	BGTZ
+41.	BLTZ
+42.	BGEZ
+43.	J
+44.	JAL
+45.	JR
+46.	JALR
 47.	MFHI
 48.	MFLO
 49.	MTHI
 50.	MTLO
+51. MFC0
+52. MTC0
+53. ERET
 
 ## 编写自己的测试脚本
 
@@ -114,7 +117,7 @@ coklr <output_dir> --instr_set c3
 示例：自定义模板并定义自己的`Task`
 
 ```python
-from co_killer.task import Task
+from co_killer.task import ASMGenerateTask
 from co_killer.compilable import ExcHandlerTemplate, Template
 from co_killer.builtin.instructions import *
 
@@ -142,7 +145,7 @@ class MyASMTextTemplate(Template):
 
 
 def get_task():
-    task = Task(output_dir='output',
+    task = ASMGenerateTask(output_dir='output',
                 repeat_time=5,
                 builtin_exc_handler=None,
                 name='my_task'

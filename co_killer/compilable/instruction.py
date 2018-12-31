@@ -200,6 +200,17 @@ class JFormatInstr(Instruction):
         return '{} {}'.format(self.name, self.label.get_label())
 
 
+class JRFormatInstr(Instruction):
+    name = 'DEFAULT_JR'
+
+    def __init__(self, rs):
+        super().__init__()
+        self.rs = Placeholder(False, rs)
+
+    def compile(self):
+        return '{} ${}'.format(self.name, self.rs.compile())
+
+
 class LOHIFormatInstr(Instruction):
     name = 'DEFAULT_LOHI'
 
@@ -216,21 +227,33 @@ class BEQFormatInstr(Instruction):
 
     def __init__(self, rs: int, rt: int, label: Label):
         super().__init__()
-        self.rs = rs
-        self.rt = rt
+        self.rs = Placeholder(False, rs)
+        self.rt = Placeholder(False, rt)
         self.label = label
 
     def compile(self):
-        return '{} ${} ${} {}'.format(self.name, self.rs, self.rt, self.label.get_label())
+        return '{} ${} ${} {}'.format(self.name, self.rs.compile(), self.rt.compile(), self.label.get_label())
 
 
 class BZeroFormatInstr(Instruction):
-    name = 'DEFAULT_BZero'
+    name = 'DEFAULT_B_ZERO'
 
     def __init__(self, rs: int, label: Label):
         super().__init__()
-        self.rs = rs
+        self.rs = Placeholder(False, rs)
         self.label = label
 
     def compile(self):
-        return '{} ${} {}'.format(self.name, self.rs, self.label.get_label())
+        return '{} ${} {}'.format(self.name, self.rs.compile(), self.label.get_label())
+
+
+class CPFormatInstr(Instruction):
+    name = 'DEFALUT_CP'
+
+    def __init__(self, rt, rd):
+        super().__init__()
+        self.rt = Placeholder(False, rt)
+        self.rd = Placeholder(False, rd)
+
+    def compile(self):
+        return '{} ${} ${}'.format(self.name, self.rt.compile(), self.rd.compile())

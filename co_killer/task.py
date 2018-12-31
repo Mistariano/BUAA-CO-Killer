@@ -2,17 +2,25 @@
 
 import os
 
+from co_killer.builtin.templates import COP0InitTemplate
 from .builtin import templates
 from .compilable.compilable import Compilable
-from .compilable.template import COP0InitTemplate, Template, TailTemplate
+from .compilable.template import Template, TailTemplate
 
 
 class Task:
-    def __init__(self, output_dir, repeat_time=1, builtin_exc_handler: str = None, with_pc_comment=True, name=None):
+    def __init__(self, name):
         if not name:
             name = 'Task_' + str(id(self))
         self.name = name
-        # print('Initializing Task', name, '...')
+
+    def run(self):
+        raise NotImplementedError()
+
+
+class ASMGenerateTask(Task):
+    def __init__(self, output_dir, repeat_time=1, builtin_exc_handler: str = None, with_pc_comment=True, name=None):
+        super().__init__(name)
         self._repeat_time = repeat_time
         self._output_dir = output_dir
         self.templates = []

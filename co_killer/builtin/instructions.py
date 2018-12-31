@@ -226,9 +226,45 @@ class BNE(BEQFormatInstr):
     name = 'bne'
 
 
+# 39.	BLEZ
+# 40.	BGTZ
+# 41.	BLTZ
+# 42.	BGEZ
+# 43.	J
+# 44.	JAL
+# 45.	JR
+# 46.	JALR
+class BLEZ(BZeroFormatInstr):
+    name = 'blez'
+
+
+class BGTZ(BZeroFormatInstr):
+    name = 'bgtz'
+
+
+class BLTZ(BZeroFormatInstr):
+    name = 'bltz'
+
+
+class BGEZ(BZeroFormatInstr):
+    name = 'bgez'
+
+
 # 43
 class J(JFormatInstr):
     name = 'j'
+
+
+class JAL(JFormatInstr):
+    name = 'jal'
+
+
+class JR(JRFormatInstr):
+    name = 'jr'
+
+
+class JALR(JRFormatInstr):
+    name = 'jalr'
 
 
 # 47
@@ -249,6 +285,24 @@ class MTHI(LOHIFormatInstr):
 # 50
 class MTLO(LOHIFormatInstr):
     name = 'mtlo'
+
+
+# 51
+class MFC0(CPFormatInstr):
+    name = 'mfc0'
+
+
+# 52
+class MTC0(CPFormatInstr):
+    name = 'mtc0'
+
+
+# 53
+class ERET(Instruction):
+    name = 'eret'
+
+    def compile(self):
+        return 'eret'
 
 
 _safe_cls_wrapper = SafeSLFormatInstr.get_safe_sl_class

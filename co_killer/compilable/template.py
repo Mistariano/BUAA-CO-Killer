@@ -87,21 +87,6 @@ class TailTemplate(Template):
         return instr_list
 
 
-class COP0InitTemplate(Template):
-    class _MTC0SR(Instruction):
-        def __init__(self):
-            super().__init__(check_name=False)
-
-        def compile(self):
-            return 'mtc0 $0 $12'
-
-    def get_initial_compilable_instances(self):
-        instr_list = [
-            self._MTC0SR()
-        ]
-        return instr_list
-
-
 class ExcHandlerTemplate(Template):
     def get_initial_compilable_instances(self):
         raise NotImplementedError
